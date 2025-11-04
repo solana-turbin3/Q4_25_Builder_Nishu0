@@ -1,0 +1,43 @@
+graph TB
+    subgraph "User Accounts"
+        UserWallet[👤 User Wallet<br/>Phantom/Solflare]
+        UserATA[🪙 User's SOL² ATA<br/>Token Account]
+    end
+    
+    subgraph "Program Accounts (PDAs)"
+        VaultPDA[🏦 User Vault PDA<br/>Seeds: vault + user_pubkey<br/>---<br/>user: Pubkey<br/>token_mint: SOL<br/>amount: 10 SOL<br/>locked: true]
+        
+        PositionPDA[📊 Position PDA<br/>Seeds: position + user + market<br/>---<br/>user: Pubkey<br/>market: SOL²<br/>quantity: 2<br/>entry_price: $10,000<br/>vault: vault_pda<br/>last_funding: timestamp]
+        
+        ConfigPDA[⚙️ Protocol Config PDA<br/>Seeds: config<br/>---<br/>admin: Pubkey<br/>is_paused: false<br/>min_ratio_long: 200%<br/>max_leverage: 3x<br/>funding_cap: ±10%]
+    end
+    
+    subgraph "Token Accounts"
+        MintAccount[🏭 SOL² Mint Account<br/>SPL Token Mint<br/>---<br/>decimals: 6<br/>mint_authority: Position Program<br/>supply: circulating]
+    end
+    
+    subgraph "Oracle Accounts"
+        PythSOL[🔮 Pyth SOL/USD<br/>Price Feed<br/>---<br/>price: $100<br/>confidence: ±$0.50<br/>timestamp: recent]
+    end
+    
+    subgraph "External Programs"
+        TokenProg[📦 SPL Token Program<br/>System Program]
+        SystemProg[🔧 System Program<br/>Rent, Account Creation]
+    end
+    
+    UserWallet -->|owns| UserATA
+    UserWallet -->|owns| VaultPDA
+    VaultPDA -->|backs| PositionPDA
+    PositionPDA -->|references| MintAccount
+    MintAccount -->|mints to| UserATA
+    
+    PositionPDA -.->|reads price| PythSOL
+    VaultPDA -.->|uses| TokenProg
+    PositionPDA -.->|uses| TokenProg
+    ConfigPDA -.->|governs| PositionPDA
+    
+    style VaultPDA fill:#e1f5ff
+    style PositionPDA fill:#fff4e1
+    style ConfigPDA fill:#f0e1ff
+    style MintAccount fill:#e1ffe1
+    style PythSOL fill:#ffe1f5

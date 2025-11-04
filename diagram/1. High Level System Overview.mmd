@@ -1,0 +1,36 @@
+graph TB
+    User[👤 User/Trader]
+    
+    subgraph "Power Perps Protocol"
+        Vault[🏦 Vault Program<br/>Collateral Management]
+        Position[📊 Position Program<br/>Long Positions]
+        Token[🪙 Power Perp Token<br/>SOL² Minting]
+        Funding[💰 Funding Program<br/>Rate Calculation]
+        Liq[⚠️ Liquidation Program<br/>Risk Management]
+    end
+    
+    Oracle[🔮 Pyth Oracle<br/>Price Feeds]
+    Frontend[💻 Web Interface<br/>React App]
+    Bots[🤖 Off-chain Bots<br/>Cranks & Liquidators]
+    
+    User -->|1. Connect Wallet| Frontend
+    Frontend -->|2. Deposit SOL| Vault
+    Vault -->|3. Lock Collateral| Position
+    Position -->|4. Request Mint| Token
+    Token -->|5. Mint SOL²| User
+    
+    Oracle -.->|Price Data| Funding
+    Oracle -.->|Price Data| Liq
+    
+    Funding -->|6. Apply Every 8hrs| Position
+    Bots -->|7. Monitor Health| Liq
+    Liq -->|8. Force Close| Position
+    
+    Position -->|9. Burn Tokens| Token
+    Vault -->|10. Return Collateral| User
+    
+    style Vault fill:#e1f5ff
+    style Position fill:#fff4e1
+    style Token fill:#f0e1ff
+    style Funding fill:#e1ffe1
+    style Liq fill:#ffe1e1
