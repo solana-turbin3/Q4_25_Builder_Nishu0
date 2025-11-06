@@ -11,7 +11,14 @@
   "dependencies": {
     "react": "19.2.0",
     "react-dom": "19.2.0",
-    "next": "16.0.1"
+    "next": "16.0.1",
+    "@privy-io/react-auth": "^1.88.4",
+    "@privy-io/server-auth": "^1.11.2",
+    "@solana/web3.js": "^1.95.8",
+    "lucide-react": "^0.454.0",
+    "clsx": "^2.1.1",
+    "lightweight-charts": "^4.2.0",
+    "react-tradingview-embed": "^3.0.6"
   },
   "devDependencies": {
     "typescript": "^5",
