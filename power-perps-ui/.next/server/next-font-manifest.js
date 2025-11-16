@@ -1,1 +1,0 @@
-self.__NEXT_FONT_MANIFEST="{\"pages\":{},\"app\":{\"/Users/nisargthakkar/Turbine/power-perps-ui/app/layout\":[\"static/media/5b01f339abf2f1a5.p.woff2\",\"static/media/028c0d39d2e8f589-s.p.woff2\"],\"/Users/nisargthakkar/Turbine/power-perps-ui/app/page\":[\"static/media/e4af272ccee01ff0-s.p.woff2\"]},\"appUsingSizeAdjust\":true,\"pagesUsingSizeAdjust\":false}"
