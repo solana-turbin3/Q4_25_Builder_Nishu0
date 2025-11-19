@@ -18,7 +18,6 @@ use {
     },
     anchor_lang::prelude::*,
     anchor_spl::token::{Mint, Token, TokenAccount},
-    solana_program::program_error::ProgramError,
 };
 
 /// Accounts required for removing liquidity from a pool
@@ -165,7 +164,7 @@ pub fn remove_liquidity(
     // Validate inputs
     msg!("Validate inputs");
     if params.lp_amount_in == 0 {
-        return Err(ProgramError::InvalidArgument.into());
+        return Err(anchor_lang::error::ErrorCode::ConstraintRaw.into());
     }
     let pool = ctx.accounts.pool.as_mut();
     let token_id = pool.get_token_id(&custody.key())?;

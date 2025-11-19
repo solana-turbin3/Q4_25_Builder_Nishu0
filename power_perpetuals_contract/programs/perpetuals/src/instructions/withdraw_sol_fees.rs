@@ -14,7 +14,6 @@ use {
         },
     },
     anchor_lang::prelude::*,
-    solana_program::sysvar,
 };
 
 /// Accounts required for withdrawing SOL fees
@@ -94,7 +93,7 @@ pub fn withdraw_sol_fees<'info>(
     // Validate inputs
     // Amount must be greater than zero
     if params.amount == 0 {
-        return Err(ProgramError::InvalidArgument.into());
+        return Err(anchor_lang::error::ErrorCode::ConstraintRaw.into());
     }
 
     // Validate multisig signatures
@@ -122,7 +121,7 @@ pub fn withdraw_sol_fees<'info>(
     let balance = ctx.accounts.transfer_authority.try_lamports()?;
     
     // Get minimum rent-exempt balance (required to keep account alive)
-    let min_balance = sysvar::rent::Rent::get()?.minimum_balance(0);
+    let min_balance = anchor_lang::solana_program::sysvar::rent::Rent::get()?.minimum_balance(0);
     
     // Calculate available balance (excess above minimum rent-exempt balance)
     // Only this excess can be withdrawn, PDA must maintain minimum balance
@@ -141,7 +140,7 @@ pub fn withdraw_sol_fees<'info>(
 
     // Validate sufficient SOL is available for withdrawal
     if available_balance < params.amount {
-        return Err(ProgramError::InsufficientFunds.into());
+        return Err(anchor_lang::error::ErrorCode::ConstraintRaw.into());
     }
 
     // Transfer SOL from transfer_authority PDA to receiving account

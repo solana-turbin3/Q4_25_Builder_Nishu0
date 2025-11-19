@@ -167,7 +167,7 @@ pub fn get_liquidation_price(
         if collateral_usd >= position.collateral_usd
             || params.remove_collateral >= position.collateral_amount
         {
-            return Err(ProgramError::InsufficientFunds.into());
+            return Err(anchor_lang::error::ErrorCode::ConstraintRaw.into());
         }
         position.collateral_usd = math::checked_sub(position.collateral_usd, collateral_usd)?;
         position.collateral_amount =

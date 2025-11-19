@@ -16,7 +16,6 @@ use {
         },
     },
     anchor_lang::prelude::*,
-    solana_program::program_memory::sol_memcpy,
     std::{
         cmp,
         io::{self, Write},
@@ -59,7 +58,7 @@ impl Write for BpfWriter<&mut [u8]> {
             buf.len(),
         );
         // Use sol_memcpy for BPF-compatible memory copy
-        sol_memcpy(&mut self.inner[(self.pos as usize)..], buf, amt);
+        anchor_lang::solana_program::program_memory::sol_memcpy(&mut self.inner[(self.pos as usize)..], buf, amt);
         self.pos += amt as u64;
         Ok(amt)
     }
@@ -143,7 +142,7 @@ pub struct UpgradeCustodyParams {}
 /// # Returns
 /// `Result<u8>` - Number of signatures still required (0 if complete), or error
 pub fn upgrade_custody<'info>(
-    ctx: Context<'_, '_, '_, 'info, UpgradeCustody<'info>>,
+    ctx: Context<'_, 'info, '_, 'info, UpgradeCustody<'info>>,
     params: &UpgradeCustodyParams,
 ) -> Result<u8> {
     // Validate multisig signatures
@@ -172,12 +171,12 @@ pub fn upgrade_custody<'info>(
     
     // Validate account owner is the perpetuals program
     if custody_account.owner != &crate::ID {
-        return Err(ProgramError::IllegalOwner.into());
+        return Err(anchor_lang::error::ErrorCode::ConstraintOwner.into());
     }
     
     // Validate account data length matches deprecated custody size
     if custody_account.try_data_len()? != DeprecatedCustody::LEN {
-        return Err(ProgramError::InvalidAccountData.into());
+        return Err(anchor_lang::error::ErrorCode::AccountDidNotDeserialize.into());
     }
     
     // Deserialize deprecated custody data
@@ -227,7 +226,7 @@ pub fn upgrade_custody<'info>(
     msg!("Re-initialize the custody");
     // Verify account was resized correctly
     if custody_account.try_data_len()? != Custody::LEN {
-        return Err(ProgramError::InvalidAccountData.into());
+        return Err(anchor_lang::error::ErrorCode::AccountDidNotDeserialize.into());
     }
     
     // Get mutable reference to account data

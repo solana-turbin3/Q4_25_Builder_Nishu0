@@ -18,7 +18,6 @@ use {
     },
     anchor_lang::prelude::*,
     anchor_spl::token::{Token, TokenAccount},
-    solana_program::program_error::ProgramError,
 };
 
 /// Accounts required for removing collateral from a position
@@ -168,7 +167,7 @@ pub fn remove_collateral(
     msg!("Validate inputs");
     let position = ctx.accounts.position.as_mut();
     if params.collateral_usd == 0 || params.collateral_usd >= position.collateral_usd {
-        return Err(ProgramError::InvalidArgument.into());
+        return Err(anchor_lang::error::ErrorCode::ConstraintRaw.into());
     }
     let pool = ctx.accounts.pool.as_mut();
 
@@ -223,7 +222,7 @@ pub fn remove_collateral(
         .get_token_amount(params.collateral_usd, collateral_custody.decimals)?;
     // Validate that calculated amount doesn't exceed available collateral
     if collateral > position.collateral_amount {
-        return Err(ProgramError::InsufficientFunds.into());
+        return Err(anchor_lang::error::ErrorCode::ConstraintRaw.into());
     }
     msg!("Amount out: {}", collateral);
 

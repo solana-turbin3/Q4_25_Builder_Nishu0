@@ -19,7 +19,6 @@ use {
     },
     anchor_lang::prelude::*,
     anchor_spl::token::{Token, TokenAccount},
-    solana_program::program_error::ProgramError,
 };
 
 /// Accounts required for adding collateral to a position
@@ -150,7 +149,7 @@ pub fn add_collateral(ctx: Context<AddCollateral>, params: &AddCollateralParams)
     // Validate inputs
     msg!("Validate inputs");
     if params.collateral == 0 {
-        return Err(ProgramError::InvalidArgument.into());
+        return Err(anchor_lang::error::ErrorCode::ConstraintRaw.into());
     }
     
     // Get mutable references to accounts

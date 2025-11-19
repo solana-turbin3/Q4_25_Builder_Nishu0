@@ -122,7 +122,7 @@ pub fn withdraw_fees<'info>(
     // Validate inputs
     // Amount must be greater than zero
     if params.amount == 0 {
-        return Err(ProgramError::InvalidArgument.into());
+        return Err(anchor_lang::error::ErrorCode::ConstraintRaw.into());
     }
 
     // Validate multisig signatures
@@ -157,7 +157,7 @@ pub fn withdraw_fees<'info>(
 
     // Validate sufficient protocol fees are available
     if custody.assets.protocol_fees < params.amount {
-        return Err(ProgramError::InsufficientFunds.into());
+        return Err(anchor_lang::error::ErrorCode::ConstraintRaw.into());
     }
     
     // Decrement protocol fees from custody

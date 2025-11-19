@@ -17,7 +17,6 @@ use {
     },
     anchor_lang::prelude::*,
     anchor_spl::token::Mint,
-    solana_program::program_error::ProgramError,
 };
 
 /// Accounts required for querying remove liquidity amount and fee
@@ -97,7 +96,7 @@ pub fn get_remove_liquidity_amount_and_fee(
 ) -> Result<AmountAndFee> {
     // Validate inputs
     if params.lp_amount_in == 0 {
-        return Err(ProgramError::InvalidArgument.into());
+        return Err(anchor_lang::error::ErrorCode::ConstraintRaw.into());
     }
     let pool = &ctx.accounts.pool;
     let custody = &ctx.accounts.custody;

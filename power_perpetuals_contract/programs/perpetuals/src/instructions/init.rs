@@ -12,7 +12,6 @@ use {
     },
     anchor_lang::prelude::*,
     anchor_spl::token::Token,
-    solana_program::program_error::ProgramError,
 };
 
 /// Accounts required for initializing the perpetuals program
@@ -134,10 +133,7 @@ pub fn init(ctx: Context<Init>, params: &InitParams) -> Result<()> {
 
     // Record multisig PDA bump
     // This is needed for future account derivations
-    multisig.bump = *ctx
-        .bumps
-        .get("multisig")
-        .ok_or(ProgramError::InvalidSeeds)?;
+    multisig.bump = ctx.bumps.multisig;
 
     // Initialize perpetuals account
     let perpetuals = ctx.accounts.perpetuals.as_mut();

@@ -126,7 +126,7 @@ pub fn remove_custody<'info>(
     if ctx.accounts.pool.ratios.is_empty()
         || params.ratios.len() != ctx.accounts.pool.ratios.len() - 1
     {
-        return Err(ProgramError::InvalidArgument.into());
+        return Err(anchor_lang::error::ErrorCode::ConstraintRaw.into());
     }
 
     // Validate multisig signatures

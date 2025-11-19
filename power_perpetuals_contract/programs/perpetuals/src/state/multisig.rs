@@ -92,7 +92,9 @@ impl Multisig {
         instruction_accounts: &[AccountInfo],
         instruction_data: &[u8],
     ) -> u64 {
-        let mut hasher = AHasher::new_with_keys(697533735114380, 537268678243635);
+        use core::hash::BuildHasher;
+        let build_hasher = ahash::RandomState::with_seeds(697533735114380, 537268678243635, 0, 0);
+        let mut hasher = build_hasher.build_hasher();
         for account in instruction_accounts {
             hasher.write(account.key.as_ref());
         }
@@ -111,7 +113,7 @@ impl Multisig {
     /// 
     /// # Returns
     /// Vector of all account infos
-    pub fn get_account_infos<'info, T: ToAccountInfos<'info>>(
+    pub fn get_account_infos<'info, T: ToAccountInfos<'info> + anchor_lang::Bumps>(
         ctx: &Context<'_, '_, '_, 'info, T>,
     ) -> Vec<AccountInfo<'info>> {
         let mut infos = ctx.accounts.to_account_infos();

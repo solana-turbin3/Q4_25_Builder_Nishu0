@@ -99,7 +99,7 @@ pub fn set_custody_config<'info>(
     // Validate inputs
     // Ratios count must match pool's ratio count to maintain consistency
     if params.ratios.len() != ctx.accounts.pool.ratios.len() {
-        return Err(ProgramError::InvalidArgument.into());
+        return Err(anchor_lang::error::ErrorCode::ConstraintRaw.into());
     }
 
     // Validate multisig signatures

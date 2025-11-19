@@ -122,7 +122,7 @@ pub fn add_pool<'info>(
     // Validate inputs
     // Pool name must be non-empty and not exceed 64 characters
     if params.name.is_empty() || params.name.len() > 64 {
-        return Err(ProgramError::InvalidArgument.into());
+        return Err(anchor_lang::error::ErrorCode::ConstraintRaw.into());
     }
 
     // Validate multisig signatures
@@ -153,7 +153,7 @@ pub fn add_pool<'info>(
     // inception_time != 0 indicates the pool has been set up
     if pool.inception_time != 0 {
         // Return error if pool is already initialized
-        return Err(ProgramError::AccountAlreadyInitialized.into());
+        return Err(anchor_lang::error::ErrorCode::ConstraintMut.into());
     }
     
     msg!("Record pool: {}", params.name);
@@ -162,11 +162,8 @@ pub fn add_pool<'info>(
     // Set pool name
     pool.name = params.name.clone();
     // Store PDA bumps for future account derivation
-    pool.bump = *ctx.bumps.get("pool").ok_or(ProgramError::InvalidSeeds)?;
-    pool.lp_token_bump = *ctx
-        .bumps
-        .get("lp_token_mint")
-        .ok_or(ProgramError::InvalidSeeds)?;
+    pool.bump = ctx.bumps.pool;
+    pool.lp_token_bump = ctx.bumps.lp_token_mint;
 
     // Validate pool configuration
     if !pool.validate() {

@@ -168,7 +168,7 @@ pub fn close_position(ctx: Context<ClosePosition>, params: &ClosePositionParams)
     // Validate inputs
     msg!("Validate inputs");
     if params.price == 0 {
-        return Err(ProgramError::InvalidArgument.into());
+        return Err(anchor_lang::error::ErrorCode::ConstraintRaw.into());
     }
     let position = ctx.accounts.position.as_mut();
     let pool = ctx.accounts.pool.as_mut();

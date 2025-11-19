@@ -139,7 +139,7 @@ impl Perpetuals {
     /// Get current time from Solana clock sysvar (production mode)
     #[cfg(not(feature = "test"))]
     pub fn get_time(&self) -> Result<i64> {
-        let time = solana_program::sysvar::clock::Clock::get()?.unix_timestamp;
+        let time = anchor_lang::solana_program::sysvar::clock::Clock::get()?.unix_timestamp;
         if time > 0 {
             Ok(time)
         } else {
@@ -156,9 +156,9 @@ impl Perpetuals {
     /// 
     /// # Returns
     /// Error if upgrade authority doesn't match
-    pub fn validate_upgrade_authority(
+    pub fn validate_upgrade_authority<'a>(
         expected_upgrade_authority: Pubkey,
-        program_data: &AccountInfo,
+        program_data: &'a AccountInfo<'a>,
         program: &Program<crate::program::Perpetuals>,
     ) -> Result<()> {
         if let Some(programdata_address) = program.programdata_address()? {

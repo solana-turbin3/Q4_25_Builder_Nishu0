@@ -19,7 +19,7 @@ use {
     },
     anchor_lang::prelude::*,
     anchor_spl::token::{Token, TokenAccount},
-    solana_program::program_error::ProgramError,
+    anchor_lang::error::ErrorCode::ConstraintRaw,
 };
 
 /// Accounts required for opening a new position
@@ -183,7 +183,7 @@ pub fn open_position(ctx: Context<OpenPosition>, params: &OpenPositionParams) ->
     msg!("Validate inputs");
     if params.price == 0 || params.collateral == 0 || params.size == 0 || params.side == Side::None
     {
-        return Err(ProgramError::InvalidArgument.into());
+        return Err(anchor_lang::error::ErrorCode::ConstraintRaw.into());
     }
     
     // Determine if collateral custody is different from position custody
@@ -344,10 +344,7 @@ pub fn open_position(ctx: Context<OpenPosition>, params: &OpenPositionParams) ->
     position.cumulative_interest_snapshot = collateral_custody.get_cumulative_interest(curtime)?;
     position.locked_amount = locked_amount;
     position.collateral_amount = params.collateral;
-    position.bump = *ctx
-        .bumps
-        .get("position")
-        .ok_or(ProgramError::InvalidSeeds)?;
+    position.bump = ctx.bumps.position;
 
     // Validate position leverage and locked amount
     msg!("Check position risks");

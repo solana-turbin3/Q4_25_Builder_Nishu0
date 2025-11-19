@@ -13,7 +13,6 @@ use {
     },
     anchor_lang::prelude::*,
     anchor_spl::token::{Token, TokenAccount},
-    solana_program::program_error::ProgramError,
 };
 
 /// Accounts required for swapping tokens within a pool
@@ -175,7 +174,7 @@ pub fn swap(ctx: Context<Swap>, params: &SwapParams) -> Result<()> {
     // Validate inputs
     msg!("Validate inputs");
     if params.amount_in == 0 {
-        return Err(ProgramError::InvalidArgument.into());
+        return Err(anchor_lang::error::ErrorCode::ConstraintRaw.into());
     }
     // Ensure receiving and dispensing custodies are different
     require_keys_neq!(receiving_custody.key(), dispensing_custody.key());

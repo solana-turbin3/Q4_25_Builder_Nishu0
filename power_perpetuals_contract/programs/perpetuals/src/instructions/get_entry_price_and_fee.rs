@@ -13,7 +13,6 @@ use {
         position::{Position, Side},
     },
     anchor_lang::prelude::*,
-    solana_program::program_error::ProgramError,
 };
 
 /// Accounts required for querying entry price and fee
@@ -103,7 +102,7 @@ pub fn get_entry_price_and_fee(
 ) -> Result<NewPositionPricesAndFee> {
     // Validate inputs
     if params.collateral == 0 || params.size == 0 || params.side == Side::None {
-        return Err(ProgramError::InvalidArgument.into());
+        return Err(anchor_lang::error::ErrorCode::ConstraintRaw.into());
     }
     let pool = &ctx.accounts.pool;
     let custody = &ctx.accounts.custody;

@@ -145,7 +145,7 @@ pub fn add_custody<'info>(
     // Validate inputs
     // Ratios must include one entry for each existing custody plus one for the new custody
     if params.ratios.len() != ctx.accounts.pool.ratios.len() + 1 {
-        return Err(ProgramError::InvalidArgument.into());
+        return Err(anchor_lang::error::ErrorCode::ConstraintRaw.into());
     }
 
     // Validate multisig signatures
@@ -172,7 +172,7 @@ pub fn add_custody<'info>(
     let pool = ctx.accounts.pool.as_mut();
     if pool.get_token_id(&ctx.accounts.custody.key()).is_ok() {
         // Return error if custody is already initialized
-        return Err(ProgramError::AccountAlreadyInitialized.into());
+        return Err(anchor_lang::error::ErrorCode::ConstraintMut.into());
     }
 
     // Update pool data to include new custody
@@ -202,11 +202,8 @@ pub fn add_custody<'info>(
     custody.borrow_rate_state.current_rate = params.borrow_rate.base_rate;
     custody.borrow_rate_state.last_update = ctx.accounts.perpetuals.get_time()?;
     // Store PDA bumps for future account derivation
-    custody.bump = *ctx.bumps.get("custody").ok_or(ProgramError::InvalidSeeds)?;
-    custody.token_account_bump = *ctx
-        .bumps
-        .get("custody_token_account")
-        .ok_or(ProgramError::InvalidSeeds)?;
+    custody.bump = ctx.bumps.custody;
+    custody.token_account_bump = ctx.bumps.custody_token_account;
 
     // Validate custody configuration
     // Return error if validation fails, otherwise return success (0 signatures left)

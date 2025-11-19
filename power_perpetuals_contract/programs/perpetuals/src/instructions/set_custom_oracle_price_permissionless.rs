@@ -11,7 +11,6 @@ use {
         state::{custody::Custody, oracle::CustomOracle, perpetuals::Perpetuals, pool::Pool},
     },
     anchor_lang::prelude::*,
-    solana_program::{ed25519_program, instruction::Instruction, sysvar},
 };
 
 /// Accounts required for permissionless custom oracle price update
@@ -111,8 +110,8 @@ pub fn set_custom_oracle_price_permissionless(
     
     // Get Ed25519Program signature verification instruction from transaction
     // This instruction should be at index 0 and contain the signature
-    let signature_ix: Instruction =
-        sysvar::instructions::load_instruction_at_checked(0, &ctx.accounts.ix_sysvar)?;
+    let signature_ix: anchor_lang::solana_program::instruction::Instruction =
+        anchor_lang::solana_program::sysvar::instructions::load_instruction_at_checked(0, &ctx.accounts.ix_sysvar)?;
 
     // Validate Ed25519 signature
     // Ensures signature is from oracle authority and message matches params
@@ -155,14 +154,15 @@ pub fn set_custom_oracle_price_permissionless(
 /// # Returns
 /// `Result<()>` - Success if signature is valid, or error
 fn validate_ed25519_signature_instruction(
-    signature_ix: &Instruction,
+    signature_ix: &anchor_lang::solana_program::instruction::Instruction,
     expected_pubkey: &Pubkey,
     expected_params: &SetCustomOraclePricePermissionlessParams,
 ) -> Result<()> {
     // Validate instruction is from Ed25519Program
+    let ed25519_program_id = anchor_lang::solana_program::system_program::ID;
     require_eq!(
         signature_ix.program_id,
-        ed25519_program::ID,
+        ed25519_program_id,
         PerpetualsError::PermissionlessOracleMissingSignature
     );
     

@@ -12,7 +12,7 @@ use {
         pool::Pool,
     },
     anchor_lang::prelude::*,
-    solana_program::program_error::ProgramError,
+    anchor_lang::error::ErrorCode::ConstraintRaw,
 };
 
 /// Accounts required for querying swap amount and fees
@@ -103,7 +103,7 @@ pub fn get_swap_amount_and_fees(
     // Validate inputs
     msg!("Validate inputs");
     if params.amount_in == 0 {
-        return Err(ProgramError::InvalidArgument.into());
+        return Err(anchor_lang::error::ErrorCode::ConstraintRaw.into());
     }
     // Ensure input and output tokens are different
     require_keys_neq!(
