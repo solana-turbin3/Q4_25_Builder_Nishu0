@@ -114,12 +114,12 @@ pub struct InitParams {
 /// 
 /// # Returns
 /// `Result<()>` - Success if initialization completed successfully
-pub fn init(ctx: Context<Init>, params: &InitParams) -> Result<()> {
+pub fn init<'info>(ctx: Context<'_, 'info, '_, 'info, Init<'info>>, params: &InitParams) -> Result<()> {
     // Validate upgrade authority
     // Ensures only the program's upgrade authority can initialize
     Perpetuals::validate_upgrade_authority(
         ctx.accounts.upgrade_authority.key(),
-        &ctx.accounts.perpetuals_program_data.to_account_info(),
+        &ctx.accounts.perpetuals_program_data,
         &ctx.accounts.perpetuals_program,
     )?;
 

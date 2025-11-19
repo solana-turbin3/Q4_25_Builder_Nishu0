@@ -96,8 +96,8 @@ pub struct GetAddLiquidityAmountAndFeeParams {
 /// `AmountAndFee` struct containing:
 /// - `amount`: LP tokens that would be minted (in LP token decimals)
 /// - `fee`: Fee amount that would be charged (in token's native decimals)
-pub fn get_add_liquidity_amount_and_fee(
-    ctx: Context<GetAddLiquidityAmountAndFee>,
+pub fn get_add_liquidity_amount_and_fee<'info>(
+    ctx: Context<'_, '_, 'info, 'info, GetAddLiquidityAmountAndFee<'info>>,
     params: &GetAddLiquidityAmountAndFeeParams,
 ) -> Result<AmountAndFee> {
     // Validate inputs

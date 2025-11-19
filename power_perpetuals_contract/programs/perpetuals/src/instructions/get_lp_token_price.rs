@@ -69,8 +69,8 @@ pub struct GetLpTokenPriceParams {}
 /// 
 /// # Returns
 /// `Result<u64>` - LP token price in USD (scaled to USD_DECIMALS), or 0 if supply is zero
-pub fn get_lp_token_price(
-    ctx: Context<GetLpTokenPrice>,
+pub fn get_lp_token_price<'info>(
+    ctx: Context<'_, '_, 'info, 'info, GetLpTokenPrice<'info>>,
     _params: &GetLpTokenPriceParams,
 ) -> Result<u64> {
     // Calculate total Assets Under Management using EMA mode

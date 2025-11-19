@@ -143,7 +143,7 @@ pub struct AddLiquidityParams {
 /// 
 /// # Returns
 /// `Result<()>` - Success if liquidity was added successfully
-pub fn add_liquidity(ctx: Context<AddLiquidity>, params: &AddLiquidityParams) -> Result<()> {
+pub fn add_liquidity<'info>(ctx: Context<'_, '_, 'info, 'info, AddLiquidity<'info>>, params: &AddLiquidityParams) -> Result<()> {
     // Check permissions
     // Both perpetuals and custody must allow adding liquidity, and custody must not be virtual
     msg!("Check permissions");

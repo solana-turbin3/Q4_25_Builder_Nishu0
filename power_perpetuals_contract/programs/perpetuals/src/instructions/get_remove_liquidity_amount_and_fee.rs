@@ -90,8 +90,8 @@ pub struct GetRemoveLiquidityAmountAndFeeParams {
 /// `Result<AmountAndFee>` - Struct containing:
 /// - `amount`: Tokens that would be returned after fees (in token decimals)
 /// - `fee`: Fee amount that would be charged (in token decimals)
-pub fn get_remove_liquidity_amount_and_fee(
-    ctx: Context<GetRemoveLiquidityAmountAndFee>,
+pub fn get_remove_liquidity_amount_and_fee<'info>(
+    ctx: Context<'_, '_, 'info, 'info, GetRemoveLiquidityAmountAndFee<'info>>,
     params: &GetRemoveLiquidityAmountAndFeeParams,
 ) -> Result<AmountAndFee> {
     // Validate inputs

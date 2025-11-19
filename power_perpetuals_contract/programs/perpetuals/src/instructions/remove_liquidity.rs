@@ -145,8 +145,8 @@ pub struct RemoveLiquidityParams {
 /// 
 /// # Returns
 /// `Result<()>` - Success if liquidity was removed successfully
-pub fn remove_liquidity(
-    ctx: Context<RemoveLiquidity>,
+pub fn remove_liquidity<'info>(
+    ctx: Context<'_, '_, 'info, 'info, RemoveLiquidity<'info>>,
     params: &RemoveLiquidityParams,
 ) -> Result<()> {
     // Check permissions

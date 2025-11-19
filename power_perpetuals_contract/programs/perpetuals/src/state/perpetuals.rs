@@ -167,7 +167,7 @@ impl Perpetuals {
                 program_data.key(),
                 ErrorCode::InvalidProgramExecutable
             );
-            let program_data: Account<ProgramData> = Account::try_from(program_data)?;
+            let program_data: Account<ProgramData> = Account::try_from_unchecked(program_data)?;
             if let Some(current_upgrade_authority) = program_data.upgrade_authority_address {
                 if current_upgrade_authority != Pubkey::default() {
                     require_keys_eq!(

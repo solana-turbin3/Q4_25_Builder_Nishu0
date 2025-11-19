@@ -50,7 +50,7 @@ pub struct UpdatePoolAum<'info> {
 /// 
 /// # Returns
 /// `Result<u128>` - Updated AUM value in USD (scaled to USD_DECIMALS), or error
-pub fn update_pool_aum(ctx: Context<UpdatePoolAum>) -> Result<u128> {
+pub fn update_pool_aum<'info>(ctx: Context<'_, '_, 'info, 'info, UpdatePoolAum<'info>>) -> Result<u128> {
     let perpetuals: &Account<'_, Perpetuals> = ctx.accounts.perpetuals.as_ref();
     let pool = ctx.accounts.pool.as_mut();
 

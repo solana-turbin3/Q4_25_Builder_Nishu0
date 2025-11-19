@@ -31,7 +31,7 @@ pub mod perpetuals {
     use super::*;
 
     // admin instructions
-    pub fn init(ctx: Context<Init>, params: InitParams) -> Result<()> {
+    pub fn init<'info>(ctx: Context<'_, 'info, '_, 'info, Init<'info>>, params: InitParams) -> Result<()> {
         instructions::init(ctx, &params)
     }
 
@@ -127,12 +127,12 @@ pub mod perpetuals {
         instructions::swap(ctx, &params)
     }
 
-    pub fn add_liquidity(ctx: Context<AddLiquidity>, params: AddLiquidityParams) -> Result<()> {
+    pub fn add_liquidity<'info>(ctx: Context<'_, '_, 'info, 'info, AddLiquidity<'info>>, params: AddLiquidityParams) -> Result<()> {
         instructions::add_liquidity(ctx, &params)
     }
 
-    pub fn remove_liquidity(
-        ctx: Context<RemoveLiquidity>,
+    pub fn remove_liquidity<'info>(
+        ctx: Context<'_, '_, 'info, 'info, RemoveLiquidity<'info>>,
         params: RemoveLiquidityParams,
     ) -> Result<()> {
         instructions::remove_liquidity(ctx, &params)
@@ -161,19 +161,19 @@ pub mod perpetuals {
         instructions::liquidate(ctx, &params)
     }
 
-    pub fn update_pool_aum(ctx: Context<UpdatePoolAum>) -> Result<u128> {
+    pub fn update_pool_aum<'info>(ctx: Context<'_, '_, 'info, 'info, UpdatePoolAum<'info>>) -> Result<u128> {
         instructions::update_pool_aum(ctx)
     }
 
-    pub fn get_add_liquidity_amount_and_fee(
-        ctx: Context<GetAddLiquidityAmountAndFee>,
+    pub fn get_add_liquidity_amount_and_fee<'info>(
+        ctx: Context<'_, '_, 'info, 'info, GetAddLiquidityAmountAndFee<'info>>,
         params: GetAddLiquidityAmountAndFeeParams,
     ) -> Result<AmountAndFee> {
         instructions::get_add_liquidity_amount_and_fee(ctx, &params)
     }
 
-    pub fn get_remove_liquidity_amount_and_fee(
-        ctx: Context<GetRemoveLiquidityAmountAndFee>,
+    pub fn get_remove_liquidity_amount_and_fee<'info>(
+        ctx: Context<'_, '_, 'info, 'info, GetRemoveLiquidityAmountAndFee<'info>>,
         params: GetRemoveLiquidityAmountAndFeeParams,
     ) -> Result<AmountAndFee> {
         instructions::get_remove_liquidity_amount_and_fee(ctx, &params)
@@ -225,15 +225,15 @@ pub mod perpetuals {
         instructions::get_swap_amount_and_fees(ctx, &params)
     }
 
-    pub fn get_assets_under_management(
-        ctx: Context<GetAssetsUnderManagement>,
+    pub fn get_assets_under_management<'info>(
+        ctx: Context<'_, '_, 'info, 'info, GetAssetsUnderManagement<'info>>,
         params: GetAssetsUnderManagementParams,
     ) -> Result<u128> {
         instructions::get_assets_under_management(ctx, &params)
     }
 
-    pub fn get_lp_token_price(
-        ctx: Context<GetLpTokenPrice>,
+    pub fn get_lp_token_price<'info>(
+        ctx: Context<'_, '_, 'info, 'info, GetLpTokenPrice<'info>>,
         params: GetLpTokenPriceParams,
     ) -> Result<u64> {
         instructions::get_lp_token_price(ctx, &params)

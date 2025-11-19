@@ -342,8 +342,8 @@ impl OraclePrice {
     /// * `max_price_age_sec` - Maximum age before price is stale
     /// * `current_time` - Current Unix timestamp
     /// * `use_ema` - Use EMA price if true, spot price otherwise
-    fn get_custom_price(
-        custom_price_info: &AccountInfo,
+    fn get_custom_price<'a>(
+        custom_price_info: &'a AccountInfo<'a>,
         max_price_error: u64,
         max_price_age_sec: u32,
         current_time: i64,
@@ -354,7 +354,7 @@ impl OraclePrice {
             PerpetualsError::UnsupportedOracleAccount
         );
 
-        let oracle_acc = Account::<CustomOracle>::try_from(custom_price_info)?;
+        let oracle_acc = Account::<CustomOracle>::try_from_unchecked(custom_price_info)?;
 
         let last_update_age_sec = math::checked_sub(current_time, oracle_acc.publish_time)?;
         if last_update_age_sec > max_price_age_sec as i64 {

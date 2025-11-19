@@ -16,12 +16,16 @@ pub enum PerpetualsError {
     UnsupportedOracle,
     #[msg("Invalid oracle account")]
     InvalidOracleAccount,
+    #[msg("Unsupported oracle account")]
+    UnsupportedOracleAccount,
     #[msg("Invalid oracle state")]
     InvalidOracleState,
     #[msg("Stale oracle price")]
     StaleOraclePrice,
     #[msg("Invalid oracle price")]
     InvalidOraclePrice,
+    #[msg("Unsupported oracle price")]
+    UnsupportedOraclePrice,
     #[msg("Instruction is not allowed in production")]
     InvalidEnvironment,
     #[msg("Invalid pool state")]
