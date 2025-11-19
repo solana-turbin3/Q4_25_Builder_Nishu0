@@ -50,7 +50,7 @@ pub struct UpdatePoolAum<'info> {
 /// 
 /// # Returns
 /// `Result<u128>` - Updated AUM value in USD (scaled to USD_DECIMALS), or error
-pub fn update_pool_aum<'info>(ctx: Context<'_, '_, 'info, 'info, UpdatePoolAum<'info>>) -> Result<u128> {
+pub fn update_pool_aum(ctx: Context<UpdatePoolAum>) -> Result<u128> {
     let perpetuals: &Account<'_, Perpetuals> = ctx.accounts.perpetuals.as_ref();
     let pool = ctx.accounts.pool.as_mut();
 
@@ -66,8 +66,12 @@ pub fn update_pool_aum<'info>(ctx: Context<'_, '_, 'info, 'info, UpdatePoolAum<'
     // Recalculate AUM using EMA mode
     // EMA mode uses exponential moving average prices for more stable calculations
     // ctx.remaining_accounts contains custody accounts and oracle accounts for all tokens
+    // Cast to extend lifetime to work around Anchor 0.32.1 lifetime variance issues
+    let remaining = unsafe {
+        core::mem::transmute::<&[AccountInfo], &[AccountInfo]>(ctx.remaining_accounts)
+    };
     pool.aum_usd =
-        pool.get_assets_under_management_usd(AumCalcMode::EMA, ctx.remaining_accounts, curtime)?;
+        pool.get_assets_under_management_usd(AumCalcMode::EMA, remaining, curtime)?;
 
     // Log updated AUM value for debugging
     msg!("Updated value: {}", pool.aum_usd);

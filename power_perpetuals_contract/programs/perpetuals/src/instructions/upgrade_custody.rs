@@ -142,7 +142,7 @@ pub struct UpgradeCustodyParams {}
 /// # Returns
 /// `Result<u8>` - Number of signatures still required (0 if complete), or error
 pub fn upgrade_custody<'info>(
-    ctx: Context<'_, 'info, '_, 'info, UpgradeCustody<'info>>,
+    ctx: Context<'_, '_, '_, 'info, UpgradeCustody<'info>>,
     params: &UpgradeCustodyParams,
 ) -> Result<u8> {
     // Validate multisig signatures
@@ -180,31 +180,35 @@ pub fn upgrade_custody<'info>(
     }
     
     // Deserialize deprecated custody data
-    let deprecated_custody = Account::<DeprecatedCustody>::try_from_unchecked(custody_account)?;
+    // Use ptr::read to avoid lifetime issues with try_from_unchecked
+    let deprecated_custody_data = {
+        let data = custody_account.try_borrow_data()?;
+        DeprecatedCustody::try_deserialize(&mut &data[..])?
+    };
 
     // Convert deprecated custody data to new custody format
     // Most fields are copied directly, but is_virtual is set to false
     let custody_data = Custody {
-        pool: deprecated_custody.pool,
-        mint: deprecated_custody.mint,
-        token_account: deprecated_custody.token_account,
-        decimals: deprecated_custody.decimals,
-        is_stable: deprecated_custody.is_stable,
+        pool: deprecated_custody_data.pool,
+        mint: deprecated_custody_data.mint,
+        token_account: deprecated_custody_data.token_account,
+        decimals: deprecated_custody_data.decimals,
+        is_stable: deprecated_custody_data.is_stable,
         is_virtual: false, // Always set to false for upgraded custodies
-        oracle: deprecated_custody.oracle,
-        pricing: deprecated_custody.pricing,
-        permissions: deprecated_custody.permissions,
-        fees: deprecated_custody.fees,
-        borrow_rate: deprecated_custody.borrow_rate,
-        assets: deprecated_custody.assets,
-        collected_fees: deprecated_custody.collected_fees,
-        volume_stats: deprecated_custody.volume_stats,
-        trade_stats: deprecated_custody.trade_stats,
-        long_positions: deprecated_custody.long_positions,
-        short_positions: deprecated_custody.short_positions,
-        borrow_rate_state: deprecated_custody.borrow_rate_state,
-        bump: deprecated_custody.bump,
-        token_account_bump: deprecated_custody.token_account_bump,
+        oracle: deprecated_custody_data.oracle,
+        pricing: deprecated_custody_data.pricing,
+        permissions: deprecated_custody_data.permissions,
+        fees: deprecated_custody_data.fees,
+        borrow_rate: deprecated_custody_data.borrow_rate,
+        assets: deprecated_custody_data.assets,
+        collected_fees: deprecated_custody_data.collected_fees,
+        volume_stats: deprecated_custody_data.volume_stats,
+        trade_stats: deprecated_custody_data.trade_stats,
+        long_positions: deprecated_custody_data.long_positions,
+        short_positions: deprecated_custody_data.short_positions,
+        borrow_rate_state: deprecated_custody_data.borrow_rate_state,
+        bump: deprecated_custody_data.bump,
+        token_account_bump: deprecated_custody_data.token_account_bump,
     };
 
     // Validate new custody configuration

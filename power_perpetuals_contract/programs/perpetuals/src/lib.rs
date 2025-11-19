@@ -31,7 +31,7 @@ pub mod perpetuals {
     use super::*;
 
     // admin instructions
-    pub fn init<'info>(ctx: Context<'_, 'info, '_, 'info, Init<'info>>, params: InitParams) -> Result<()> {
+    pub fn init(ctx: Context<Init>, params: InitParams) -> Result<()> {
         instructions::init(ctx, &params)
     }
 
@@ -99,7 +99,7 @@ pub mod perpetuals {
     }
 
     pub fn upgrade_custody<'info>(
-        ctx: Context<'_, 'info, '_, 'info, UpgradeCustody<'info>>,
+        ctx: Context<'_, '_, '_, 'info, UpgradeCustody<'info>>,
         params: UpgradeCustodyParams,
     ) -> Result<u8> {
         instructions::upgrade_custody(ctx, &params)
@@ -161,7 +161,7 @@ pub mod perpetuals {
         instructions::liquidate(ctx, &params)
     }
 
-    pub fn update_pool_aum<'info>(ctx: Context<'_, '_, 'info, 'info, UpdatePoolAum<'info>>) -> Result<u128> {
+    pub fn update_pool_aum(ctx: Context<UpdatePoolAum>) -> Result<u128> {
         instructions::update_pool_aum(ctx)
     }
 
