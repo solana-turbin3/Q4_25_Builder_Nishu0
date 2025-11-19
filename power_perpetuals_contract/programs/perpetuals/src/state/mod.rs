@@ -1,3 +1,6 @@
+// pub mod oracle; // Commented out until dependencies (error, math modules) are added
+
+// Include state.rs content here
 use anchor_lang::prelude::*;
 
 /// Pool account - tracks the overall state of the power perpetuals pool
