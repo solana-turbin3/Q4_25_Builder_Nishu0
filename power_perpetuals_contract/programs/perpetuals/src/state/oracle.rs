@@ -405,8 +405,21 @@ impl OraclePrice {
             !Perpetuals::is_empty_account(pyth_price_info)?,
             PerpetualsError::InvalidOracleAccount
         );
-        let price_feed = pyth_sdk_solana::load_price_feed_from_account_info(pyth_price_info)
-            .map_err(|_| PerpetualsError::InvalidOracleAccount)?;
+        // Note: Pyth SDK integration - requires pyth-solana-sdk dependency
+        // For now, this will fail compilation until the correct Pyth SDK is added
+        // let price_feed = pyth_solana_sdk::load_price_feed_from_account_info(pyth_price_info)
+        //     .map_err(|_| PerpetualsError::InvalidOracleAccount)?;
+        
+        // Temporary: Return error until Pyth SDK is properly configured
+        return err!(PerpetualsError::UnsupportedOracle);
+        
+        // TODO: Uncomment when Pyth SDK is added:
+        /*
+        let pyth_price = if use_ema {
+            price_feed.get_ema_price_unchecked()
+        } else {
+            price_feed.get_price_unchecked()
+        };
         let pyth_price = if use_ema {
             price_feed.get_ema_price_unchecked()
         } else {
