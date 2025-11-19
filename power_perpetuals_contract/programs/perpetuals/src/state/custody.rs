@@ -286,7 +286,7 @@ impl Custody {
         }
 
         if self.assets.owned < self.assets.locked {
-            Err(ProgramError::InsufficientFunds.into())
+            Err(PerpetualsError::CustodyAmountLimit.into())
         } else {
             Ok(())
         }

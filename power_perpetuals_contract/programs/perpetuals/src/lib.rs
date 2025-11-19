@@ -99,7 +99,7 @@ pub mod perpetuals {
     }
 
     pub fn upgrade_custody<'info>(
-        ctx: Context<'_, '_, '_, 'info, UpgradeCustody<'info>>,
+        ctx: Context<'_, 'info, '_, 'info, UpgradeCustody<'info>>,
         params: UpgradeCustodyParams,
     ) -> Result<u8> {
         instructions::upgrade_custody(ctx, &params)

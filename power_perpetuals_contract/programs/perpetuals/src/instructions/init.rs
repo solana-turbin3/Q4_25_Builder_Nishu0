@@ -150,17 +150,11 @@ pub fn init(ctx: Context<Init>, params: &InitParams) -> Result<()> {
     
     // Record transfer_authority PDA bump
     // This is needed for token account authority derivations
-    perpetuals.transfer_authority_bump = *ctx
-        .bumps
-        .get("transfer_authority")
-        .ok_or(ProgramError::InvalidSeeds)?;
+    perpetuals.transfer_authority_bump = ctx.bumps.transfer_authority;
     
     // Record perpetuals PDA bump
     // This is needed for future account derivations
-    perpetuals.perpetuals_bump = *ctx
-        .bumps
-        .get("perpetuals")
-        .ok_or(ProgramError::InvalidSeeds)?;
+    perpetuals.perpetuals_bump = ctx.bumps.perpetuals;
     
     // Set inception time to current time
     // This is used as a reference point for time-based calculations

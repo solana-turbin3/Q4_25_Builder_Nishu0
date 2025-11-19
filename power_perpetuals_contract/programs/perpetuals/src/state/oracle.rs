@@ -351,7 +351,7 @@ impl OraclePrice {
     ) -> Result<OraclePrice> {
         require!(
             !Perpetuals::is_empty_account(custom_price_info)?,
-            PerpetualsError::InvalidOracleAccount
+            PerpetualsError::UnsupportedOracleAccount
         );
 
         let oracle_acc = Account::<CustomOracle>::try_from(custom_price_info)?;
@@ -374,7 +374,7 @@ impl OraclePrice {
             )? > max_price_error as u128
         {
             msg!("Error: Custom oracle price is out of bounds");
-            return err!(PerpetualsError::InvalidOraclePrice);
+            return err!(PerpetualsError::UnsupportedOraclePrice);
         }
 
         Ok(OraclePrice {
@@ -403,12 +403,12 @@ impl OraclePrice {
     ) -> Result<OraclePrice> {
         require!(
             !Perpetuals::is_empty_account(pyth_price_info)?,
-            PerpetualsError::InvalidOracleAccount
+            PerpetualsError::UnsupportedOracleAccount
         );
         // Note: Pyth SDK integration - requires pyth-solana-sdk dependency
         // For now, this will fail compilation until the correct Pyth SDK is added
         // let price_feed = pyth_solana_sdk::load_price_feed_from_account_info(pyth_price_info)
-        //     .map_err(|_| PerpetualsError::InvalidOracleAccount)?;
+        //     .map_err(|_| PerpetualsError::UnsupportedOracleAccount)?;
         
         // Temporary: Return error until Pyth SDK is properly configured
         return err!(PerpetualsError::UnsupportedOracle);
@@ -439,7 +439,7 @@ impl OraclePrice {
             )? > max_price_error as u128
         {
             msg!("Error: Pyth oracle price is out of bounds");
-            return err!(PerpetualsError::InvalidOraclePrice);
+            return err!(PerpetualsError::UnsupportedOraclePrice);
         }
 
         Ok(OraclePrice {

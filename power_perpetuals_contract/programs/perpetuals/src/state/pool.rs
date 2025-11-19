@@ -1013,7 +1013,7 @@ impl Pool {
         for (idx, &custody) in self.custodies.iter().enumerate() {
             let oracle_idx = idx + self.custodies.len();
             if oracle_idx >= accounts.len() {
-                return Err(ProgramError::NotEnoughAccountKeys.into());
+                return Err(PerpetualsError::UnsupportedOracle.into());
             }
 
             require_keys_eq!(accounts[idx].key(), custody);
@@ -1173,7 +1173,7 @@ impl Pool {
             return Ok(0);
         }
         let (new_token_aum_usd, new_pool_aum_usd) = if amount_add > 0 && amount_remove > 0 {
-            return Err(ProgramError::InvalidArgument.into());
+            return Err(PerpetualsError::InvalidPositionState.into());
         } else if amount_add == 0 && amount_remove == 0 {
             (
                 token_price.get_asset_amount_usd(custody.assets.owned, custody.decimals)? as u128,
