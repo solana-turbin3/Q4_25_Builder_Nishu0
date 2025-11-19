@@ -21,15 +21,15 @@ custom-panic = []
 
 
 [dependencies]
-anchor-lang = "0.32.1"
+anchor-lang = {version = "0.32.1", features = ["init-if-needed"]}
 anchor-spl = "0.32.1"
 solana-security-txt = "1.1.1"
-pyth-sdk-solana = "0.8.0"
-ahash = "0.7.7"
+ahash = { version = "0.8.6", default-features = false, features = ["compile-time-rng"] }
 num-traits = "0.2.15"
 num = "0.4.0"
 bytemuck = "1.13.1"
 
+[dev-dependencies]
 
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(target_os, values("solana"))'] }
