@@ -144,20 +144,46 @@ impl OraclePrice {
         use_ema: bool,
     ) -> Result<Self> {
         match oracle_params.oracle_type {
-            OracleType::Custom => Self::get_custom_price(
-                oracle_account,
-                oracle_params.max_price_error,
-                oracle_params.max_price_age_sec,
-                current_time,
-                use_ema,
-            ),
-            OracleType::Pyth => Self::get_pyth_price(
-                oracle_account,
-                oracle_params.max_price_error,
-                oracle_params.max_price_age_sec,
-                current_time,
-                use_ema,
-            ),
+            OracleType::Custom => {
+                require!(
+                    !Perpetuals::is_empty_account(oracle_account)?,
+                    PerpetualsError::InvalidOracleAccount
+                );
+                let data = oracle_account.try_borrow_data()?;
+                // Manually parse CustomOracle fields (skip 8-byte discriminator)
+                let price = u64::from_le_bytes(data[8..16].try_into().unwrap());
+                let expo = i32::from_le_bytes(data[16..20].try_into().unwrap());
+                let conf = u64::from_le_bytes(data[20..28].try_into().unwrap());
+                let ema = u64::from_le_bytes(data[28..36].try_into().unwrap());
+                let publish_time = i64::from_le_bytes(data[36..44].try_into().unwrap());
+                let last_update_age_sec = math::checked_sub(current_time, publish_time)?;
+                if last_update_age_sec > oracle_params.max_price_age_sec as i64 {
+                    msg!("Error: Custom oracle price is stale");
+                    return err!(PerpetualsError::StaleOraclePrice);
+                }
+                let oracle_price = if use_ema { ema } else { price };
+                if oracle_price == 0
+                    || math::checked_div(
+                        math::checked_mul(conf as u128, Perpetuals::BPS_POWER)?,
+                        oracle_price as u128,
+                    )? > oracle_params.max_price_error as u128
+                {
+                    msg!("Error: Custom oracle price is out of bounds");
+                    return err!(PerpetualsError::InvalidOraclePrice);
+                }
+                Ok(OraclePrice {
+                    price: oracle_price,
+                    exponent: expo,
+                })
+            },
+            OracleType::Pyth => {
+                require!(
+                    !Perpetuals::is_empty_account(oracle_account)?,
+                    PerpetualsError::InvalidOracleAccount
+                );
+                // Temporary: Return error until Pyth SDK is properly configured
+                return err!(PerpetualsError::UnsupportedOracle);
+            },
             _ => err!(PerpetualsError::UnsupportedOracle),
         }
     }
@@ -394,12 +420,12 @@ impl OraclePrice {
     /// * `max_price_age_sec` - Maximum age before price is stale
     /// * `current_time` - Current Unix timestamp
     /// * `use_ema` - Use EMA price if true, spot price otherwise
-    fn get_pyth_price(
-        pyth_price_info: &AccountInfo,
-        max_price_error: u64,
-        max_price_age_sec: u32,
-        current_time: i64,
-        use_ema: bool,
+    fn get_pyth_price<'a>(
+        pyth_price_info: &'a AccountInfo<'a>,
+        _max_price_error: u64,
+        _max_price_age_sec: u32,
+        _current_time: i64,
+        _use_ema: bool,
     ) -> Result<OraclePrice> {
         require!(
             !Perpetuals::is_empty_account(pyth_price_info)?,
