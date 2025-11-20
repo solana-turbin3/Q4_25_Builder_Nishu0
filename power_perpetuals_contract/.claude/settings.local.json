@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(anchor build:*)"
+      "Bash(anchor build:*)",
+      "Bash(cat:*)",
+      "Bash(pnpm add:*)",
+      "Bash(npx tsc:*)"
     ],
     "deny": [],
     "ask": []

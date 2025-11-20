@@ -391,3 +391,81 @@ pub fn to_token_amount(ui_amount: f64, decimals: u8) -> Result<u64> {
         checked_powi(10.0, decimals as i32)?,
     )?)
 }
+
+/// Calculate power perpetuals payoff
+///
+/// For power perps with power n:
+/// - payoff = size * ((exit_price / entry_price)^n - 1)
+///
+/// # Arguments
+/// * `exit_price` - Current/exit price (scaled)
+/// * `entry_price` - Entry price (scaled)
+/// * `size_usd` - Position size in USD
+/// * `power` - Power multiplier (1-5)
+/// * `price_decimals` - Number of decimals for price
+/// * `usd_decimals` - Number of decimals for USD amounts
+///
+/// # Returns
+/// Tuple of (profit_usd, loss_usd) where only one will be non-zero
+///
+/// # Math Explanation
+/// Power perps amplify returns based on price ratio raised to a power:
+/// - power=1: linear perps, return = (S_exit/S_entry - 1)
+/// - power=2: squared perps, return = (S_exit/S_entry)^2 - 1
+/// - power=3: cubed perps, return = (S_exit/S_entry)^3 - 1
+/// etc.
+pub fn calc_power_perps_pnl(
+    exit_price: u64,
+    entry_price: u64,
+    size_usd: u64,
+    power: u8,
+    price_decimals: u8,
+    _usd_decimals: u8,
+) -> Result<(u64, u64)> {
+    if entry_price == 0 || power == 0 || power > 5 {
+        return Ok((0, 0));
+    }
+
+    // Calculate price ratio: exit_price / entry_price
+    // We use high precision to avoid loss during power calculation
+    let price_scale = checked_pow(10u128, price_decimals as usize)?;
+    let ratio = checked_div(
+        checked_mul(exit_price as u128, price_scale)?,
+        entry_price as u128,
+    )?;
+
+    // Calculate ratio^power
+    let ratio_powered = if power == 1 {
+        ratio
+    } else {
+        let mut result = ratio;
+        for _ in 1..power {
+            result = checked_div(
+                checked_mul(result, ratio)?,
+                price_scale,
+            )?;
+        }
+        result
+    };
+
+    // Calculate return: ratio^power - 1
+    // If ratio_powered > price_scale: profit
+    // If ratio_powered < price_scale: loss
+    if ratio_powered >= price_scale {
+        // Profit case
+        let return_multiplier = checked_sub(ratio_powered, price_scale)?;
+        let profit_usd = checked_as_u64(checked_div(
+            checked_mul(size_usd as u128, return_multiplier)?,
+            price_scale,
+        )?)?;
+        Ok((profit_usd, 0))
+    } else {
+        // Loss case
+        let return_multiplier = checked_sub(price_scale, ratio_powered)?;
+        let loss_usd = checked_as_u64(checked_div(
+            checked_mul(size_usd as u128, return_multiplier)?,
+            price_scale,
+        )?)?;
+        Ok((0, loss_usd))
+    }
+}

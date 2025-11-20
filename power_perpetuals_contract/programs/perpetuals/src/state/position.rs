@@ -68,6 +68,9 @@ pub struct Position {
     pub update_time: i64,
     /// Position side (Long, Short, or None)
     pub side: Side,
+    /// Power multiplier for power perpetuals (1-5)
+    /// power=1: linear perps, power=2: squared perps, etc.
+    pub power: u8,
     /// Entry price scaled to PRICE_DECIMALS
     pub price: u64,
     /// Position size in USD (scaled to USD_DECIMALS)

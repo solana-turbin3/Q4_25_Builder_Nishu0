@@ -738,10 +738,35 @@ impl Pool {
             curtime,
         )?;
 
-        Ok(current_leverage <= custody.pricing.max_leverage
+        // Apply power-based leverage limits
+        // Higher power = more volatile = lower max leverage
+        // power=1: standard leverage limits
+        // power=2: max 20x initial, max 40x leverage
+        // power=3: max 10x initial, max 20x leverage
+        // power=4: max 5x initial, max 10x leverage
+        // power=5: max 3x initial, max 6x leverage
+        let power_max_initial_leverage = match position.power {
+            1 => custody.pricing.max_initial_leverage,
+            2 => std::cmp::min(custody.pricing.max_initial_leverage, 20_0000), // 20x in BPS
+            3 => std::cmp::min(custody.pricing.max_initial_leverage, 10_0000), // 10x in BPS
+            4 => std::cmp::min(custody.pricing.max_initial_leverage, 5_0000),  // 5x in BPS
+            5 => std::cmp::min(custody.pricing.max_initial_leverage, 3_0000),  // 3x in BPS
+            _ => custody.pricing.max_initial_leverage,
+        };
+
+        let power_max_leverage = match position.power {
+            1 => custody.pricing.max_leverage,
+            2 => std::cmp::min(custody.pricing.max_leverage, 40_0000), // 40x in BPS
+            3 => std::cmp::min(custody.pricing.max_leverage, 20_0000), // 20x in BPS
+            4 => std::cmp::min(custody.pricing.max_leverage, 10_0000), // 10x in BPS
+            5 => std::cmp::min(custody.pricing.max_leverage, 6_0000),  // 6x in BPS
+            _ => custody.pricing.max_leverage,
+        };
+
+        Ok(current_leverage <= power_max_leverage
             && (!initial
                 || (current_leverage >= custody.pricing.min_initial_leverage
-                    && current_leverage <= custody.pricing.max_initial_leverage)))
+                    && current_leverage <= power_max_initial_leverage)))
     }
 
     /// Calculate liquidation price for a position
@@ -892,29 +917,33 @@ impl Pool {
             position.unrealized_loss_usd,
         )?;
 
-        let (price_diff_profit, price_diff_loss) = if position.side == Side::Long {
-            if exit_price > position.price {
-                (math::checked_sub(exit_price, position.price)?, 0u64)
-            } else {
-                (0u64, math::checked_sub(position.price, exit_price)?)
-            }
-        } else if exit_price < position.price {
-            (math::checked_sub(position.price, exit_price)?, 0u64)
+        // Calculate power perps PnL based on price ratio raised to power
+        // For power=1: behaves like linear perps
+        // For power>1: amplified returns based on (exit_price/entry_price)^power - 1
+        let (price_profit_usd, price_loss_usd) = if position.side == Side::Long {
+            // Long: profit when price goes up
+            math::calc_power_perps_pnl(
+                exit_price,
+                position.price,
+                position.size_usd,
+                position.power,
+                Perpetuals::PRICE_DECIMALS,
+                Perpetuals::USD_DECIMALS,
+            )?
         } else {
-            (0u64, math::checked_sub(exit_price, position.price)?)
+            // Short: profit when price goes down (inverse the prices)
+            math::calc_power_perps_pnl(
+                position.price,
+                exit_price,
+                position.size_usd,
+                position.power,
+                Perpetuals::PRICE_DECIMALS,
+                Perpetuals::USD_DECIMALS,
+            )?
         };
 
-        let position_price = math::scale_to_exponent(
-            position.price,
-            -(Perpetuals::PRICE_DECIMALS as i32),
-            -(Perpetuals::USD_DECIMALS as i32),
-        )?;
-
-        if price_diff_profit > 0 {
-            let potential_profit_usd = math::checked_as_u64(math::checked_div(
-                math::checked_mul(position.size_usd as u128, price_diff_profit as u128)?,
-                position_price as u128,
-            )?)?;
+        if price_profit_usd > 0 {
+            let potential_profit_usd = price_profit_usd;
 
             let potential_profit_usd =
                 math::checked_add(potential_profit_usd, position.unrealized_profit_usd)?;
@@ -952,10 +981,7 @@ impl Pool {
                 ))
             }
         } else {
-            let potential_loss_usd = math::checked_as_u64(math::checked_ceil_div(
-                math::checked_mul(position.size_usd as u128, price_diff_loss as u128)?,
-                position_price as u128,
-            )?)?;
+            let potential_loss_usd = price_loss_usd;
 
             let potential_loss_usd = math::checked_add(potential_loss_usd, unrealized_loss_usd)?;
 

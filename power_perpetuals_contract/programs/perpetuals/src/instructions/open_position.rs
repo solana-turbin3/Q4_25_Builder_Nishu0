@@ -141,6 +141,9 @@ pub struct OpenPositionParams {
     pub size: u64,
     /// Position side (Long or Short)
     pub side: Side,
+    /// Power multiplier for power perpetuals (1-5)
+    /// 1 = linear perps, 2 = squared perps, 3 = cubed, etc.
+    pub power: u8,
 }
 
 /// Open a new trading position
@@ -185,7 +188,14 @@ pub fn open_position(ctx: Context<OpenPosition>, params: &OpenPositionParams) ->
     {
         return Err(anchor_lang::error::ErrorCode::ConstraintRaw.into());
     }
-    
+
+    // Validate power parameter (must be 1-5)
+    // power=1: linear perps, power=2: squared, ..., power=5: max power
+    require!(
+        params.power >= 1 && params.power <= 5,
+        PerpetualsError::InvalidPositionState
+    );
+
     // Determine if collateral custody is different from position custody
     // For shorts or virtual custodies, must use a different stablecoin as collateral
     let use_collateral_custody = params.side == Side::Short || custody.is_virtual;
@@ -335,6 +345,7 @@ pub fn open_position(ctx: Context<OpenPosition>, params: &OpenPositionParams) ->
     position.open_time = perpetuals.get_time()?;
     position.update_time = 0;
     position.side = params.side;
+    position.power = params.power;
     position.price = position_price;
     position.size_usd = size_usd;
     position.borrow_size_usd = borrow_size_usd;
