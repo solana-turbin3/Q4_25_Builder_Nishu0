@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(anchor build:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
